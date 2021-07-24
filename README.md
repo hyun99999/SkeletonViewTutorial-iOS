@@ -1,9 +1,11 @@
-# SkeletonViewTutorial-iOS
-☠️ 오픈소스 라이브러리 SkeletonView 을 활용한 튜토리얼
+# SkeletonViewTutorial
+☠️ 오픈소스 라이브러리 SkeletonView 를 사용해보자
+
+<img src = "https://user-images.githubusercontent.com/69136340/126873750-e176c158-7a68-41c2-a768-73359bf3fdcb.gif" width ="250">
 
 [GitHub - Juanpe/SkeletonView](https://github.com/Juanpe/SkeletonView)
 
-- skeleton view 는 예를 들어 네트워크 통신을 통해서 데이터를 기다리는 동안 화면에 아무것도 띄우지 않기 보다 뭔가 진행되고 있는 듯한 느낌을 사용자에게 주어 체감시간을 줄여줄 수 있다.
+- SkeletonView 는 사용자에게 어떤 일이 일어나고 있음을 보여주고 어떤 콘텐츠를 기다리고 있는지 준비하는 방법으로 소개된다.
 
 ### Installation
 
@@ -81,6 +83,8 @@ public protocol SkeletonCollectionViewDataSource: UICollectionViewDataSource {
 
 ### **🔠 Texts**
 
+텍스트가 있는 elements 를 사용할 때 `SkeletonView` 는 시뮬레이션하기 위해서 그려본다. 게다가 원하는 라인 수를 결정할 수 있다. `numberOfLines` 이 0 으로 설정되어 있다면 전체 골격을 채우는 데 필요한 선 수를 계산하여 그려진다. 대신 0보다 큰 숫자로 설정하면 이 수의 선만 그린다.
+
 ```swift
 // Corner radius of lines 
 // 0...100 (default: 70)
@@ -95,36 +99,113 @@ descriptionTextView.linesCornerRadius = 5
 
 Corner radius of lines.
 
-<img width="600" alt="스크린샷 2021-07-24 오후 8 52 49" src="https://user-images.githubusercontent.com/69136340/126871530-b81e8430-93c0-4cc5-90fe-34168f7ff867.png">
-
+<img width="600" alt="스크린샷 2021-07-24 오후 8 52 49" src="https://user-images.githubusercontent.com/69136340/126871530-b81e8430-93c0-4cc5-90fe-34168f7ff867.png">
 
 Filling percent of the last line.
 
-<img width="600" alt="스크린샷 2021-07-24 오후 8 53 12" src="https://user-images.githubusercontent.com/69136340/126871534-6af34ddf-355b-4626-8138-972becf2c314.png">
+<img width="600" alt="스크린샷 2021-07-24 오후 8 53 12" src="https://user-images.githubusercontent.com/69136340/126871534-6af34ddf-355b-4626-8138-972becf2c314.png">
 
 ### 실습해보자
 
 - ViewController.swift
 
 ```swift
+import UIKit
+import SkeletonView
 
+class ViewController: UIViewController {
+    var countData: [Int] = []
+
+    // MARK: - @IBOutlet Properties
+    @IBOutlet weak var skeletonCollectionView: UICollectionView!
+    
+    // MARK: - View Life Cycle
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        skeletonCollectionView.delegate = self
+        skeletonCollectionView.dataSource = self
+        skeletonCollectionView.register(UINib(nibName: "SkeletonCollectionViewCell", bundle: nil), forCellWithReuseIdentifier: "SkeletonCollectionViewCell")
+        
+        skeletonCollectionView.isSkeletonable = true
+        skeletonCollectionView.showSkeleton()
+        // 다음과 같이 설정 가능
+//        skeletonCollectionView.showSkeleton(usingColor: .clouds, transition: .crossDissolve(0.25))
+        
+        // 네트워크 통신 대신 DisdspatchQueue 를 통해서 2초간 딜레이를 주어서 구현
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            for i in 0..<10 {
+                self.countData.append(i)
+            }
+            
+            self.skeletonCollectionView.stopSkeletonAnimation()
+            self.skeletonCollectionView.hideSkeleton()
+            // 다음과 같이 설정 가능
+    //        skeletonCollectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
+        }
+    }
+}
 ```
 
 exestion
 
 ```swift
+// MARK: - SkeletonTableViewDelegate
+extension ViewController: SkeletonCollectionViewDelegate { }
 
+// MARK: - SkeletonTableViewDataSource
+extension ViewController: SkeletonCollectionViewDataSource {
+    func collectionSkeletonView(_ skeletonView: UICollectionView, cellIdentifierForItemAt indexPath: IndexPath) -> ReusableCellIdentifier {
+        return "SkeletonCollectionViewCell"
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return countData.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SkeletonCollectionViewCell", for: indexPath) as? SkeletonCollectionViewCell else {
+            return UICollectionViewCell()
+        }
+        cell.skeletonImageView.image = UIImage(named: "icon") ?? UIImage()
+        cell.skeletonFirstLabel.text = String(countData[indexPath.row])
+        cell.skeletonTextView.text = String(countData[indexPath.row])
+
+        return cell
+    }
+    
+    
+    func collectionSkeletonView(_ skeletonView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+        // 컬렉션뷰를 다 채우기 위한 개수
+        return UICollectionView.automaticNumberOfSkeletonItems
+        
+        // skeletonView 가 보여질 때 
+        // return 1
+    }
+}
+
+extension ViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let cellWidth = collectionView.frame.width
+        return CGSize(width: cellWidth, height: 150)
+    }
+}
 ```
 
-- SkeletonCollectionViewCel.swift
+- SkeletonCollectionViewCell.xib
+
+<img width="600" alt="스크린샷 2021-07-25 오전 12 28 53" src="https://user-images.githubusercontent.com/69136340/126873478-8708bf20-4535-49f0-8a69-ccca05445fc5.png">
+
+- SkeletonCollectionViewCell.swift
 
 ```swift
 import UIKit
 
 class SkeletonCollectionViewCell: UICollectionViewCell {
     
-    @IBOutlet weak var skeletonThirdLabel: UILabel!
-    @IBOutlet weak var skeletonSecondLabel: UILabel!
+
+    @IBOutlet weak var skeletonTextView: UITextView!
     @IBOutlet weak var skeletonFirstLabel: UILabel!
     @IBOutlet weak var skeletonImageView: UIImageView!
     
@@ -134,17 +215,21 @@ class SkeletonCollectionViewCell: UICollectionViewCell {
         self.isSkeletonable = true
         self.skeletonImageView.isSkeletonable = true
         self.skeletonFirstLabel.isSkeletonable = true
-        self.skeletonSecondLabel.isSkeletonable = true
-        self.skeletonThirdLabel.isSkeletonable = true
+        self.skeletonTextView.isSkeletonable = true
         
-        skeletonImageView.skeletonCornerRadius = 10
-        skeletonFirstLabel.skeletonCornerRadius = 10
-        skeletonSecondLabel.skeletonCornerRadius = 10
-        skeletonThirdLabel.skeletonCornerRadius = 10
+        // 둥근 모서리
         
-        skeletonFirstLabel.lastLineFillPercent = 30
-        skeletonSecondLabel.lastLineFillPercent = 50
-        skeletonThirdLabel.lastLineFillPercent = 70
+        self.skeletonImageView.skeletonCornerRadius = 10
+        self.skeletonFirstLabel.linesCornerRadius = 5
+        self.skeletonTextView.linesCornerRadius = 5
+
+        // 마지막 줄에 skeleton 채우는 비율
+        
+        // numberOfLines 가 1 이면 적용되지 않음
+        self.skeletonFirstLabel.numberOfLines = 2
+        self.skeletonFirstLabel.lastLineFillPercent = 50
+
+        self.skeletonTextView.lastLineFillPercent = 50
     }
 }
 ```
