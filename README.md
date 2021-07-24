@@ -174,14 +174,11 @@ extension ViewController: SkeletonCollectionViewDataSource {
         return cell
     }
     
-    
+    // skeletonView 으로 보여질 section 의 item 개수
     func collectionSkeletonView(_ skeletonView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        // 컬렉션뷰를 다 채우기 위한 개수
+        // 아래의 코드로 컬렉션뷰를 다 채울 수 있다.
         return UICollectionView.automaticNumberOfSkeletonItems
-        
-        // skeletonView 가 보여질 때 
-        // return 1
     }
 }
 
