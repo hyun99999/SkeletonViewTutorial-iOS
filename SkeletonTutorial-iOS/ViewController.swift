@@ -25,26 +25,25 @@ class ViewController: UIViewController {
         skeletonCollectionView.isSkeletonable = true
         skeletonCollectionView.showSkeleton()
         // 다음과 같이 설정 가능
-//        skeletonCollectionView.showSkeleton(usingColor: .gray, transition: .crossDissolve(0.25))
+//        skeletonCollectionView.showSkeleton(usingColor: .clouds, transition: .crossDissolve(0.25))
         
         // 네트워크 통신 대신 DisdspatchQueue 를 통해서 2초간 딜레이를 주어서 구현
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             for i in 0..<10 {
                 self.countData.append(i)
             }
+            
+            self.skeletonCollectionView.stopSkeletonAnimation()
+            self.skeletonCollectionView.hideSkeleton()
+            // 다음과 같이 설정 가능
+    //        skeletonCollectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
         }
-        skeletonCollectionView.stopSkeletonAnimation()
-        skeletonCollectionView.hideSkeleton()
-        // 다음과 같이 설정 가능
-//        skeletonCollectionView.hideSkeleton(reloadDataAfter: true, transition: .crossDissolve(0.25))
     }
 }
 
 // MARK: - SkeletonTableViewDelegate
-extension ViewController: SkeletonCollectionViewDelegate {
-    
-    
-}
+extension ViewController: SkeletonCollectionViewDelegate { }
+
 // MARK: - SkeletonTableViewDataSource
 extension ViewController: SkeletonCollectionViewDataSource {
     func collectionSkeletonView(_ skeletonView: UICollectionView, cellIdentifierForItemAt indexPath: IndexPath) -> ReusableCellIdentifier {
@@ -61,15 +60,19 @@ extension ViewController: SkeletonCollectionViewDataSource {
         }
         cell.skeletonImageView.image = UIImage(named: "icon") ?? UIImage()
         cell.skeletonFirstLabel.text = String(countData[indexPath.row])
-        cell.skeletonSecondLabel.text = String(countData[indexPath.row])
-        cell.skeletonThirdLabel.text = String(countData[indexPath.row])
+        cell.skeletonTextView.text = String(countData[indexPath.row])
 
         return cell
     }
     
-    // 컬렉션뷰를 다 채우기 위한 개수
+    
     func collectionSkeletonView(_ skeletonView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+        // 컬렉션뷰를 다 채우기 위한 개수
         return UICollectionView.automaticNumberOfSkeletonItems
+        
+        // skeletonView 가 보여질 때 
+        // return 1
     }
 }
 

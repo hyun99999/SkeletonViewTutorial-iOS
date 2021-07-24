@@ -9,8 +9,8 @@ import UIKit
 
 class SkeletonCollectionViewCell: UICollectionViewCell {
     
-    @IBOutlet weak var skeletonThirdLabel: UILabel!
-    @IBOutlet weak var skeletonSecondLabel: UILabel!
+
+    @IBOutlet weak var skeletonTextView: UITextView!
     @IBOutlet weak var skeletonFirstLabel: UILabel!
     @IBOutlet weak var skeletonImageView: UIImageView!
     
@@ -20,17 +20,20 @@ class SkeletonCollectionViewCell: UICollectionViewCell {
         self.isSkeletonable = true
         self.skeletonImageView.isSkeletonable = true
         self.skeletonFirstLabel.isSkeletonable = true
-        self.skeletonSecondLabel.isSkeletonable = true
-        self.skeletonThirdLabel.isSkeletonable = true
+        self.skeletonTextView.isSkeletonable = true
         
-        skeletonImageView.skeletonCornerRadius = 10
-        skeletonFirstLabel.skeletonCornerRadius = 10
-        skeletonSecondLabel.skeletonCornerRadius = 10
-        skeletonThirdLabel.skeletonCornerRadius = 10
+        // 둥근 모서리
         
-        skeletonFirstLabel.lastLineFillPercent = 30
-        skeletonSecondLabel.lastLineFillPercent = 50
-        skeletonThirdLabel.lastLineFillPercent = 70
-    }
+        self.skeletonImageView.skeletonCornerRadius = 10
+        self.skeletonFirstLabel.linesCornerRadius = 5
+        self.skeletonTextView.linesCornerRadius = 5
 
+        // 마지막 줄에 skeleton 채우는 비율
+        
+        // numberOfLines 가 1 이면 적용되지 않음
+        self.skeletonFirstLabel.numberOfLines = 2
+        self.skeletonFirstLabel.lastLineFillPercent = 50
+
+        self.skeletonTextView.lastLineFillPercent = 50
+    }
 }
